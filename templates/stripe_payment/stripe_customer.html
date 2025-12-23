@@ -1,0 +1,98 @@
+{% load static %}
+{% block content %}
+
+<div style="position: relative; width: 100%; height: 60px; margin-bottom: 2rem; align-items: center; background-color: #6772e5;
+background-repeat: no-repeat; background-image: url('{% static "stripe_api/stripe_logo.png" %}');">
+  <div style="position: absolute; left: 150px; top: 10px; color: white; font-size: 15px"><b>dashboard</b></div>
+  <div style="position: absolute; left: 150px; top: 20px; color: white; font-size: 30px"><b>CUSTOMER</b></div>
+</div>
+
+<div style="text-align: center; margin-bottom: 2rem;">
+  <a href="{% url 'stripe_home' %}" rel="noreferrer noopener"><button style="background-color: #6772e5; border: none; color: white; padding: 4px 6px; text-align: center; text-decoration: none; display: inline-block; cursor: pointer;"><b>BACK TO HOMEPAGE</b></button></a><br><br>
+</div>
+
+<div style="display: flex; flex-direction: column; align-items: center; flex-wrap: wrap; flex: 1;">
+  <div style="display: flex; flex-direction: row; width:100%; margin-bottom: 1rem;">
+    <div style="display: flex; flex-direction: column; flex: 8; text-align: center;"><b>PRODUCT NAME</b></div>
+    <div style="display: flex; flex-direction: column; flex: 4; text-align: center;"><b>DIMENSIONS (mm) / WEIGHT (grams)</b></div>
+    <div style="display: flex; flex-direction: column; flex: 3; text-align: right;"><b>PRICE</b></div>
+    <div style="display: flex; flex-direction: column; flex: 2; text-align: center;"><b>CURRENCY</b></div>
+    <div style="display: flex; flex-direction: column; flex: 1; text-align: center;"><b>SHIP</b></div>
+    <div style="display: flex; flex-direction: column; flex: 4; text-align: center;"><b>ACTIONS</b></div>
+  </div>
+
+  {% for product in products %}
+    {% if product.active %}
+    {% comment %} METADATA: {{ product.metadata.product_quantity }} {% endcomment %}
+    <div style="display: flex; flex-direction: row; width:100%; align-items: center; justify-content: center;
+    border-bottom: 1px solid; padding-top: 0.5rem; padding-bottom: 0.5rem;">
+
+      <div style="display: flex; flex-direction: column; flex: 8;">
+        <div><b>{{ product.name }}</b></div>
+        <div><i>{{ product.description }}</i></div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; flex: 4; text-align: center;">
+        {% for product_id, price in products_prices.items %}
+          {% if product.id == product_id %}
+            {% if product.package_dimensions %}
+              H{{ product.package_dimensions.height }}*L{{ product.package_dimensions.length }}*W{{ product.package_dimensions.width }} / {{ product.package_dimensions.weight }}
+            {% else %}
+              X
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <div style="display: flex; flex-direction: column; flex: 3; text-align: right;">
+        {% for product_id, price in products_prices.items %}
+          {% if product.id == product_id %}
+            {{ price.0 }}
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <div style="display: flex; flex-direction: column; flex: 2; text-align: center;">
+        {% for product_id, price in products_prices.items %}
+          {% if product.id == product_id %}
+            {{ price.1 }}
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <div style="display: flex; flex-direction: column; flex: 1; text-align: center;">
+        {% if product.shippable %}YES
+        {% else %}NO
+        {% endif %}
+      </div>
+
+      <div style="display: flex; flex-direction: row; width:100%; align-items: center; justify-content: center; flex: 4;
+      text-align: center; margin-top: 0.5rem; margin-bottom: 0.5rem; gap: 0.5rem;">
+        <form action="{% url 'stripe_checkout' product.id %}" method="get" style="margin: 0;">
+          {% csrf_token %}
+          {% comment %} <div style="display: flex; flex-direction: row;"><input type="text" name="product_quantity" style="width: 2em; margin-right: 0.2rem;" placeholder= "qty"> {% endcomment %}
+          <div style="display: flex; flex-direction: row; gap: 0.5rem;">
+            <select name="product_quantity">
+              <option value="1" selected>1</option> <option value="2">2</option> <option value="3">3</option>
+              <option value="4">4</option> <option value="5">5</option> <option value="6">6</option>
+              <option value="7">7</option> <option value="8">8</option> <option value="9">9</option>
+              <option value="10">10</option> <option value="11">11</option> <option value="12">12</option>
+              <option value="13">13</option> <option value="14">14</option> <option value="15">15</option>
+              <option value="16">16</option> <option value="17">17</option> <option value="18">18</option>
+              <option value="19">19</option> <option value="20">20</option>
+            </select>
+
+            <button name="product" value="buy-product" type="submit" style="background-color: #6772e5; border: none; color: white; padding: 4px 6px; text-align: center; text-decoration: none; display: inline-block; cursor: pointer;">PURCHASE</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  {% endfor %}
+
+</div>
+
+
+{% comment %} <img src="{% static 'stripe_api/stripe_logo.png' %}" class="img-center"><br> {% endcomment %}
+
+{% endblock content %}

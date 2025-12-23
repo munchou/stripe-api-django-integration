@@ -1,0 +1,11 @@
+{% block content %}
+
+<div style="text-align: center;">
+  <h1>ORDER CANCELLED</u><br>
+  Product: {{ product }}<br>
+  Total amount: {{ product_amount }}<br>
+  <br>
+  <a href="{% url 'stripe_home' %}" target="_blank" rel="noreferrer noopener">Back to Stripe Payment page</a>
+</div>
+
+{% endblock content %}

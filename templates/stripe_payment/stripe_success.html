@@ -1,0 +1,12 @@
+{% block content %}
+
+<div style="text-align: center;">
+  <h1>PRODUCT SUCCESSFULLY ORDERED</u><br>
+  Product: {{ product }}<br>
+  Quantity: {{ quantity }}<br>
+  Paid amount: {{ paid_amount }}<br>
+  <br>
+  <a href="{% url 'stripe_home' %}" target="_blank" rel="noreferrer noopener">Back to Stripe Payment page</a>
+</div>
+
+{% endblock content %}

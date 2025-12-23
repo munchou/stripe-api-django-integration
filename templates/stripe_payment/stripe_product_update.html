@@ -1,0 +1,56 @@
+{% load static %}
+{% block content %}
+
+<div style="position: relative; width: 100%; height: 60px; margin-bottom: 1rem; align-items: center; background-color: #6772e5;
+background-repeat: no-repeat; background-image: url('{% static "stripe_api/stripe_logo.png" %}');"">
+  <div style="position: absolute; left: 150px; top: 10px; color: white; font-size: 15px"><b>dashboard</b></div>
+  <div style="position: absolute; left: 150px; top: 20px; color: white; font-size: 30px"><b>ADMIN</b></div>
+</div>
+
+
+<div style="display: flex; flex-direction: row; justify-content: space-evenly; flex-wrap: wrap;">
+  <div style="display: flex; flex-direction: column; align-items: center; flex-wrap: wrap; margin-bottom: 2rem; flex: 1;">
+    <h1 style="margin: 0;">UPDATE A PRODUCT</h1>
+    <i style="margin-bottom: 1rem;">product ID: {{ product_id }}</i>   
+    <div style="border-top: 1px solid #6772e5; padding-top: 1rem; margin-bottom: 1rem; border-bottom: 1px solid #6772e5">
+      <form method="post">
+        {% csrf_token %}
+        
+        <div style="display:flex; flex-direction: row; gap: 1rem;">
+          <div style="display:flex; flex-direction: column;">
+            <div style="display:flex; flex-direction: row; margin-bottom: 0.5rem;">{{ createproduct_form.product_name }}</div>
+            <div style="display:flex; flex-direction: row; margin-bottom: 0.5rem;">{{ createproduct_form.product_description }}</div>
+          </div>
+
+          <div style="display:flex; flex-direction: column;">
+            <div style="display:flex; flex-direction: row; margin-bottom: 0.5rem; gap: 0.5rem;">{{ createproduct_form.product_price }} {{ createproduct_form.product_currency }}</div>
+            <div style="display:flex; flex-direction: row; margin-bottom: 0.5rem;">{{ createproduct_form.product_shippable }} Can be shipped</div>
+            <div>Product dimensions <i>optional</i><br>
+            Size in mm (float 0.0), weight in grams (g)</div>
+            <div style="display:flex; flex-direction: row; gap: 0.5rem; margin-top: 0.2rem;">
+              <div style="display:flex; flex-direction: row; margin-bottom: 0.5rem;">{{ createproduct_form.product_dim_height }}</div>
+              <div style="display:flex; flex-direction: row; margin-bottom: 0.5rem;">{{ createproduct_form.product_dim_length }}</div>
+              <div style="display:flex; flex-direction: row; margin-bottom: 0.5rem;">{{ createproduct_form.product_dim_width }}</div>
+              <div style="display:flex; flex-direction: row; margin-bottom: 0.5rem;">{{ createproduct_form.product_dim_weight }}</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction: column;">
+          <button type="submit" name="update-product" style="background-color: #6772e5; border: none; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; cursor: pointer;"><b>Update that product</b></button>
+        </div>
+      </form>
+    </div>
+    
+    <div style="display:flex; flex-direction: row; gap: 0.5rem;">
+      <a href="{% url 'stripe_home' %}" rel="noreferrer noopener"><button style="background-color: #6772e5; border: none; color: white; padding: 4px 6px; text-align: center; text-decoration: none; display: inline-block; cursor: pointer;"><b>BACK TO HOMEPAGE</b></button></a>
+      <a href="{% url 'stripe_admin' %}" rel="noreferrer noopener"><button style="background-color: #6772e5; border: none; color: white; padding: 4px 6px; text-align: center; text-decoration: none; display: inline-block; cursor: pointer;"><b>BACK TO ADMIN DASHBOARD</b></button></a>
+    </div>
+
+  </div>
+
+</div>
+
+
+{% comment %} <img src="{% static 'stripe_api/stripe_logo.png' %}" class="img-center"><br> {% endcomment %}
+
+{% endblock content %}

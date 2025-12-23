@@ -1,0 +1,118 @@
+{% load static %}
+{% block content %}
+
+<div style="position: relative; width: 100%; height: 60px; margin-bottom: 1rem; align-items: center; background-color: #6772e5;
+background-repeat: no-repeat; background-image: url('{% static "stripe_api/stripe_logo.png" %}');"">
+  <div style="position: absolute; left: 150px; top: 10px; color: white; font-size: 15px"><b>dashboard</b></div>
+  <div style="position: absolute; left: 150px; top: 20px; color: white; font-size: 30px"><b>ADMIN</b></div>
+</div>
+
+
+
+<div style="text-align: center; margin-bottom: 2rem;">
+  <a href="{% url 'stripe_home' %}" rel="noreferrer noopener"><button style="background-color: #6772e5; border: none; color: white; padding: 4px 6px; text-align: center; text-decoration: none; display: inline-block; cursor: pointer;"><b>BACK TO HOMEPAGE</b></button></a><br><br>
+  {{ products_active }} listed products / {{ products_archived }} archived products.<br>
+  <b>ACCOUNT BALANCE (pending):</b> <u>{{ balance_pending_amount }} {{ balance_pending_currency }}</u>
+</div>
+
+<div style="display: flex; flex-direction: row; justify-content: space-evenly; flex-wrap: wrap;">
+  <div style="display: flex; flex-direction: column; align-items: center; flex-wrap: wrap; margin-bottom: 2rem; flex: 1;">
+    <h1>CREATE A PRODUCT</h1>   
+    <div style="border-top: 1px solid #6772e5; padding-top: 1rem; border-bottom: 1px solid #6772e5">
+      <form method="post">
+        {% csrf_token %}
+        
+        <div style="display:flex; flex-direction: row; gap: 1rem;">
+          <div style="display:flex; flex-direction: column;">
+            <div style="display:flex; flex-direction: row; margin-bottom: 0.5rem;">{{ createproduct_form.product_name }}</div>
+            <div style="display:flex; flex-direction: row; margin-bottom: 0.5rem;">{{ createproduct_form.product_description }}</div>
+          </div>
+
+          <div style="display:flex; flex-direction: column;">
+            <div style="display:flex; flex-direction: row; margin-bottom: 0.5rem; gap: 0.5rem;">{{ createproduct_form.product_price }} {{ createproduct_form.product_currency }}</div>
+            <div style="display:flex; flex-direction: row; margin-bottom: 0.5rem;">{{ createproduct_form.product_shippable }} Can be shipped</div>
+            <div>Product dimensions <i>optional</i><br>
+            Size in mm (float 0.0), weight in grams (g)</div>
+            <div style="display:flex; flex-direction: row; gap: 0.5rem; margin-top: 0.2rem;">
+              <div style="display:flex; flex-direction: row; margin-bottom: 0.5rem;">{{ createproduct_form.product_dim_height }}</div>
+              <div style="display:flex; flex-direction: row; margin-bottom: 0.5rem;">{{ createproduct_form.product_dim_length }}</div>
+              <div style="display:flex; flex-direction: row; margin-bottom: 0.5rem;">{{ createproduct_form.product_dim_width }}</div>
+              <div style="display:flex; flex-direction: row; margin-bottom: 0.5rem;">{{ createproduct_form.product_dim_weight }}</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction: column;">
+          <button type="submit" name="create-product" style="background-color: #6772e5; border: none; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; cursor: pointer;"><b>Create product</b></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; align-items: center; flex-wrap: wrap; flex: 1.5;">
+    <h1>EDIT A PRODUCT ({{ products|length }} products (max: 100))</h1>
+
+    {% for product in products %} <br>
+      {% comment %} METADATA: {{ product.metadata.product_quantity }} {% endcomment %}
+      <div style="display: flex; flex-direction: row; width:100%; align-items: center; justify-content: center; border-bottom: 1px solid;">
+
+        <div style="display: flex; flex-direction: column; flex: 8;">
+          <div><b>{{ product.name }}</b></div>
+          <div><i>{{ product.description }}</i></div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; flex: 4; text-align: center;">
+          {% for product_id, price in products_prices.items %}
+            {% if product.id == product_id %}
+              {% if product.package_dimensions %}
+                H{{ product.package_dimensions.height }}*L{{ product.package_dimensions.length }}*W{{ product.package_dimensions.width }} / {{ product.package_dimensions.weight }}
+              {% else %}
+                X
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <div style="display: flex; flex-direction: column; flex: 3; text-align: right;">
+          {% for product_id, price in products_prices.items %}
+            {% if product.id == product_id %}
+              {{ price.0 }}
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <div style="display: flex; flex-direction: column; flex: 2; text-align: center;">
+          {% for product_id, price in products_prices.items %}
+            {% if product.id == product_id %}
+              {{ price.1 }}
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <div style="display: flex; flex-direction: column; flex: 1; text-align: center;">
+          {% if product.shippable %}YES
+          {% else %}NO
+          {% endif %}
+        </div>
+
+        <div style="display: flex; flex-direction: row; width:100%; align-items: center; justify-content: center; flex: 4; text-align: center; margin-top: 0.5rem; margin-bottom: 0.5rem; gap: 0.5rem;">
+          <form action="{% url 'stripe_product_update' product.id %}" method="post" style="margin: 0;">
+            {% csrf_token %}
+              <button name="product" value="edit-product" type="submit" style="background-color: #6772e5; border: none; color: white; padding: 4px 6px; text-align: center; text-decoration: none; display: inline-block; cursor: pointer;">EDIT</button>
+          </form>
+          
+          <form action="{% url 'stripe_product_archive' product.id %}" method="post" style="margin: 0;">
+            {% csrf_token %}
+            <a href="{% url 'stripe_product_archive' product.id %}"><button name="product" value="archive-product" type="submit" style="background-color: #6772e5; border: none; color: white; padding: 4px 6px; text-align: center; text-decoration: none; display: inline-block; cursor: pointer;">ARCHIVE</button></a>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+
+  </div>
+
+</div>
+
+
+{% comment %} <img src="{% static 'stripe_api/stripe_logo.png' %}" class="img-center"><br> {% endcomment %}
+
+{% endblock content %}

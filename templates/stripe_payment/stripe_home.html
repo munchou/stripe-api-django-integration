@@ -1,0 +1,78 @@
+{% load static %}
+{% block content %}
+
+
+<div style="position: relative; width: 100%; height: 60px; align-items: center; background-color: #6772e5; background-repeat: no-repeat; background-image: url('{% static "stripe_api/stripe_logo.png" %}');"">
+  <div style="position: absolute; left: 150px; top: 10px; color: white; font-size: 15px"><b>dashboard (not optimized for smartphones/tablets)</b></div>
+  <div style="position: absolute; right: 5px; bottom: 5px; color: white; font-size: 15px"><i>last updated: 23 Dec. 2025</i></div>
+  <div style="position: absolute; left: 150px; top: 20px; color: white; font-size: 30px"><b>WELCOME</b></div>
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; flex-wrap: wrap; margin-top: 4rem;">
+  <div style="display: flex; flex-direction: row; align-items: center; justify-content: center; flex-wrap: wrap; gap:3rem;">
+    <a href="{% url 'stripe_customer' %}" target="_blank" rel="noreferrer noopener"><button style="background-color: #6772e5; border: none; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; cursor: pointer;"><b>DASHBOARD FOR CUSTOMERS</b></button></a>
+    <a href="{% url 'stripe_admin' %}" target="_blank" rel="noreferrer noopener"><button style="background-color: #6772e5; border: none; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; cursor: pointer;"><b>DASHBOARD FOR ADMIN</b></button></a>
+  </div>
+
+  <div>
+    <div style="display: flex; flex-direction: row; height: 60px; align-items: center; margin-top: 4rem; background-color: #6772e5;">
+      <div style="position: relative; left: 30px; color: white; font-size: 30px"><b>SOME INFORMATION</b></div>
+    </div>
+
+    <div style="display: flex; flex-direction: row; margin-top: 0.5rem; gap: 1rem;">
+
+      <div style="display: flex; flex-direction: column; flex: 1;">
+        <div style="text-align: center; margin-bottom: 0.5rem;">
+          <b>ABOUT STRIPE</b>
+        </div>
+        <div>
+          <a href="https://stripe.com/" target="_blank" rel="noreferrer noopener">Stripe</a> is a financial technology company that provides payment processing software and APIs for online and in-person businesses, allowing them to accept various payments (cards, digital wallets, bank transfers) and manage revenue streams through a customizable, developer-friendly platform. It's more than just payments, offering tools for subscriptions, marketplaces (Connect), fraud prevention, issuing cards, and banking services, making it a comprehensive financial infrastructure for businesses of all sizes.
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; flex: 2;">
+        <div style="text-align: center; margin-bottom: 0.5rem;">
+          <b>ABOUT THAT DASHBOARD API INTEGRATION</b><br>
+          <a href="https://github.com/munchou/stripe-api-django-integration" target="_blank" rel="noreferrer noopener">Source code on my GitHub</a>
+        </div>
+        <div>
+          I used the provided Stripe Python SDK (14.0.0) (<a href="https://docs.stripe.com/" target="_blank" rel="noreferrer noopener">see official documentation</a>) and integrated the calls in my Django backend.<br>
+          <br>
+          That dashboard was made in less than 3 days as a showcase (Dec. 17 to 19 2025 for the main features, a bit more to make a design with several pages), to prove that even without experience in companies, it is feasible. Because right now, hiring companies seem to be convinced that no experience in a specific fiels or with specific tools = impossible tasks for developers (that's our job to adapt, you know...).<br>
+          <br>
+          As it is a mock account (Stripe calls that "Sandbox", where the provided API key is only for test purposes), anyone can interact with it, I haven't added any user restriction (I will if I see bots and such start getting cray-cray). If you want to limit the access, edit the views file, add <i>@login_required</i> before the target function and define what type of user(s) can access the dashboard (ideally something like <i>request.user.is_superuser</i>).<br>
+          <br>
+          Surprisingly, prices are stored as strings of digits, therefore without commas. The prices displayed on that page are automatically "processed" in the back-end with a hand-written 10-line function to add commas for an easier reading (5465155 -> 5,465,155).<br>
+          <br>
+          The page does not render the same in Firefox (which I use) and Edge, so there may be some design issues with the latter.
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; flex: 2;">
+        <div style="text-align: center; margin-bottom: 0.5rem;">
+          <b>SOME TECHNICAL DETAILS</b>
+        </div>
+        <div>
+          <b><u>Product quantity (available / to purchase)</u></b> Stripe is a payment gateway, not an inventory management. Products' quantities management are to be handled separately after having set a database (<a href="https://docs.stripe.com/billing/subscriptions/quantities" target="_blank" rel="noreferrer noopener">there are some specific use cases explained here</a> and they are based on prices objects, not products, which I find unnecessarily complicated), especially if the company sells physical products and not services.<br>
+          Because there does not seem to be a simple way to set the number of items to buy, my first way was to add a QTY field processed in the <i>stripe_checkout</i> function. Any invalid input (= not a number) would result in a quantity of 1 upon checking out. It is also important to notice that without a database, one could order as many items as wished. Which means without controlling the products' availability, customers may order products that are no longer in stock (or too few). So one must implement some code to compare the user's input with what's available in the database, and update accordingly.<br>
+          My second (and current) way was to use a menu list like what one can see on Amazon: one selects the desired quantity (up to 20). This is obviously to be customized depending on the type of product.<br>
+          Note that one interesting way could be to use the product's <i>metadata</i> field and customize it upon a product's creation. For example <i>metadata = {"available_qty": "12"}</i>, or even dynamically retrieve the quantity directly from the database. Upon every completed order, the value would update as well as the database. Doing so would avoid making requests to the database to check if there are enough products as it would be directly checked within the product object.<br>
+          <br>
+          <b><u>Product package dimensions</u></b> Maybe is it because of the Sandbox mode, but I couldn't find the dimensions field anywhere on Stripe's dashboard, neither on the product creation page nor the product edit one. It's quite confusing, but I managed to add and retrieve dimensions anyway (optional) as they still exist in the product's data.<br>
+          <br>
+          <b><u>Product prices</u></b> Weirdly enough, Stripe takes prices in cents (or pence or whatever the smallest unit of the target currency). Which is in my opinion unnatural, to stay polite. "That'll be 499 cents please." (and not "four ninety-nine" 4.99). So I added some code to let the admin input prices in a normal way (like "55.50" USD instead of "5550", which is then converted into 5550 in the back end and displayed the right way on the dashboards. Which should be done by Stripe's back-end, but hey, why make things simple when they can be complicated...<br>
+          <br>
+          <b><u>Product update</u></b> One more thing that Stripe cannot handle (I'm afraid the more I dig, the more there are...): price modification. It does NOT allow to update the price of a product nor its currency. Wow, in 2025... I don't know if it's because a price object is be linked to more than an object or not, that wouldn't make sense but I don't see what else could explain such restriction. So the solution is, if the user decided to update a price or the currency, to CREATE a new price object and again update the object to link that newly create price to it. How fucked up is that... :')<br>
+          So it's the "solution" I implemented.<br>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+
+{% comment %} <img src="{% static 'stripe_api/stripe_logo.png' %}" class="img-center"><br> {% endcomment %}
+
+{% endblock content %}
